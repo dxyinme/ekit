@@ -16,7 +16,6 @@ package tree
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/ecodeclub/ekit"
 	"github.com/ecodeclub/ekit/internal/iterator"
@@ -59,6 +58,9 @@ type rbNode[K any, V any] struct {
 	left, right, parent *rbNode[K, V]
 }
 
+// getNext 寻找node的后继节点
+// case1: node节点存在右子节点,则右子树的最小节点是node的后继节点
+// case2: node节点不存在右子节点,则其第一个为左节点的祖先的父节点为node的后继节点
 func (node *rbNode[K, V]) getNext() *rbNode[K, V] {
 	if node == nil {
 		return nil
@@ -601,63 +603,4 @@ func (node *rbNode[K, V]) isValidNode() bool {
 		vis++
 	}
 	return vis > 0
-}
-
-type rbTreeIterator[K any, V any] struct {
-	rbTree   *RBTree[K, V]
-	currNode *rbNode[K, V]
-	nxtNode  *rbNode[K, V]
-	err      error
-}
-
-func (iter *rbTreeIterator[K, V]) Next() bool {
-	fmt.Println(iter.currNode.key, iter.currNode.value)
-	iter.err = nil
-	iter.currNode = iter.nxtNode
-	if iter.currNode != nil {
-		iter.nxtNode = iter.currNode.getNext()
-		return true
-	}
-	iter.err = ErrRBTreeIteratorNoNext
-	return false
-}
-
-func (iter *rbTreeIterator[K, V]) HasNext() bool {
-	return iter.nxtNode != nil
-}
-
-func (iter *rbTreeIterator[K, V]) Get() (kvPair pair.Pair[K, V]) {
-	iter.err = nil
-	if iter.currNode == nil {
-		iter.err = ErrRBTreeIteratorInvalid
-		return
-	}
-	kvPair = pair.NewPair(iter.currNode.key, iter.currNode.value)
-	return
-}
-
-func (iter *rbTreeIterator[K, V]) Err() error {
-	return iter.err
-}
-
-func (iter *rbTreeIterator[K, V]) Valid() bool {
-	return iter.currNode != nil
-}
-
-func (iter *rbTreeIterator[K, V]) Delete() {
-	iter.err = nil
-	if !iter.currNode.isValidNode() {
-		iter.err = ErrRBTreeIteratorInvalid
-		return
-	}
-	iter.rbTree.deleteNode(iter.currNode)
-}
-
-func newRBTreeIterator[K any, V any](rbTree *RBTree[K, V], rbNode *rbNode[K, V]) iterator.Iterator[pair.Pair[K, V]] {
-	iter := &rbTreeIterator[K, V]{
-		rbTree:   rbTree,
-		currNode: rbNode,
-	}
-	iter.nxtNode = iter.currNode.getNext()
-	return iter
 }

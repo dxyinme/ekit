@@ -14,6 +14,7 @@
 
 package iterator
 
+// Iterator
 // 一个迭代器的接口，所有的容器类型都可以实现自己的迭代器
 // 只需要继承当前接口即可
 type Iterator[T any] interface {
@@ -24,11 +25,8 @@ type Iterator[T any] interface {
 	// 获取迭代器当前所指向的节点的信息
 	Get() T
 
-	// 获取error
+	// 获取 error。当你在执行 Get 或者 Delete 之后，如果有必要，可以通过该方法来检测是否运作正常
 	Err() error
-
-	// 判断是否有后继节点
-	HasNext() bool
 
 	// 判断当前节点是否合法
 	Valid() bool
